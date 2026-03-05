@@ -1,0 +1,28 @@
+/**
+ * Demo 页面样式
+ * Demo 页面样式
+ */
+.demo-page {
+  &__title {
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  &__section {
+    margin-top: 1.5rem;
+    /* 约束卡片宽度，避免宽内容撑开整页导致缩小视口时“元素右移”（与表格横向滚动区一致） */
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  &__card-footer {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+}
+
+/* 时间演示页：不设 min/max 宽度，符合开发规范 */
+.time-demo-page {
+  /* width: 100% 由模板 w-full 提供 */
+}

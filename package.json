@@ -1,0 +1,81 @@
+{
+  "name": "lite-vue-pro",
+  "version": "0.1.0",
+  "description": "Lightweight enterprise admin frontend framework based on Vue 3 + TypeScript + Vite 8 + Element Plus",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/guojipeng5034/LiteVuePro.git"
+  },
+  "keywords": [
+    "vue3",
+    "admin",
+    "element-plus",
+    "typescript",
+    "vite",
+    "pinia",
+    "unocss",
+    "enterprise",
+    "management"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "vite --mode env.local",
+    "build:local": "node ./scripts/update-version-json.js && node --max_old_space_size=4096 ./node_modules/vite/bin/vite.js build",
+    "build:dev": "node ./scripts/update-version-json.js && node --max_old_space_size=4096 ./node_modules/vite/bin/vite.js build --mode dev",
+    "build:test": "node ./scripts/update-version-json.js && node --max_old_space_size=4096 ./node_modules/vite/bin/vite.js build --mode test",
+    "build:prod": "node ./scripts/update-version-json.js && node --max_old_space_size=4096 ./node_modules/vite/bin/vite.js build --mode prod",
+    "postinstall": "node scripts/copy-tinymce.cjs"
+  },
+  "dependencies": {
+    "@fullcalendar/core": "^6.1.20",
+    "@fullcalendar/daygrid": "^6.1.20",
+    "@fullcalendar/interaction": "^6.1.20",
+    "@fullcalendar/timegrid": "^6.1.20",
+    "@fullcalendar/vue3": "^6.1.20",
+    "@growthbook/growthbook": "^1.6.4",
+    "@iconify/vue": "^5.0.0",
+    "@tinymce/tinymce-vue": "^6.3.0",
+    "@vee-validate/zod": "^4.15.1",
+    "alova": "^3.5.0",
+    "dayjs": "^1.11.13",
+    "element-plus": "^2.13.2",
+    "nprogress": "^0.2.0",
+    "pinia": "^3.0.4",
+    "pinia-plugin-persistedstate": "^4.7.1",
+    "qs": "^6.14.1",
+    "tinymce": "^8.3.2",
+    "vee-validate": "^4.15.1",
+    "vue": "^3.5.24",
+    "vue-dompurify-html": "^5.3.0",
+    "vue-i18n": "^10.0.4",
+    "vue-router": "^4.5.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@plugin-web-update-notification/vite": "^2.0.2",
+    "@types/node": "^24.10.9",
+    "@types/nprogress": "^0.2.3",
+    "@types/qs": "^6.14.0",
+    "@unocss/reset": "^66.6.0",
+    "@unocss/transformer-directives": "^66.6.0",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "@vue/tsconfig": "^0.8.1",
+    "cross-env": "^7.0.3",
+    "fast-glob": "^3.3.3",
+    "msw": "^2.12.7",
+    "sass": "^1.77.0",
+    "typescript": "~5.9.3",
+    "unocss": "^66.6.0",
+    "unplugin-auto-import": "^21.0.0",
+    "unplugin-vue-components": "^31.0.0",
+    "vite": "^8.0.0-beta.16",
+    "vite-plugin-svg-icons": "^2.0.1",
+    "vue-tsc": "^3.1.4"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  }
+}

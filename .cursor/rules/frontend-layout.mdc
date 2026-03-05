@@ -1,0 +1,14 @@
+---
+description: 页面布局规范 - 不设 min/max 宽度，禁止横向滚动条，默认 100% 宽度
+globs: **/*.vue, **/*.scss, **/*.css
+---
+
+# 页面布局规范
+
+- **页面不设置最小宽度（min-width）和最大宽度（max-width）。**
+- **默认需要宽度时统一使用 `width: 100%`（w-full）。**
+- **默认布局由上到下、从左到右**（文档流）。
+- **禁止视口出现横向滚动条**：全局 `box-sizing: border-box`（避免 w-full + padding 溢出）；根层级或主内容区使用 `overflow-x: hidden`；flex 子项需收缩时使用 `min-w-0`；**el-table** 及表格、`<pre>` 等宽内容须放在 `overflow-x-auto` 容器内（如 `<div class="w-full overflow-x-auto">`）。
+- 全屏布局使用 `h-full`，滚动区域使用 `overflow-auto` 或 `overflow-y-auto`。
+
+详见 `docs/DEVELOPMENT_STANDARDS.md`。

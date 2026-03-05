@@ -1,0 +1,249 @@
+/* 全局 border-box：width/height 含 padding、border，避免 w-full + padding 撑出横向滚动条 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+html,
+body {
+  margin: 0;
+  min-width: 320px;
+  height: 100%;
+  overflow-x: hidden; /* 禁止视口出现横向滚动条，宽内容在各自容器内 overflow-x-auto */
+}
+
+body {
+  display: flex;
+  place-items: stretch;
+  height: 100%;
+}
+
+#app {
+  flex: 1;
+  width: 100%;
+  min-width: 0; /* flex 子项可收缩，避免撑出横向滚动条 */
+  min-height: 0;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+.card {
+  padding: 2em;
+}
+
+
+@media (prefers-color-scheme: light) {
+  :root:not(.dark) {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+
+/* 默认浅色：页面背景与 Element 变量一致（slate-50） */
+html:not(.theme-brand):not(.theme-china-red):not(.theme-japanese):not(.theme-middle-east):not(.theme-southeast-asia):not(.dark) body,
+html:not(.theme-brand):not(.theme-china-red):not(.theme-japanese):not(.theme-middle-east):not(.theme-southeast-asia):not(.dark) #app {
+  background-color: #f8fafc;
+}
+
+/* 默认深色：slate 蓝调深色，与 Element 变量一致 */
+html.dark:not(.theme-brand):not(.theme-china-red):not(.theme-japanese):not(.theme-middle-east):not(.theme-southeast-asia) {
+  color-scheme: dark;
+  color: #f1f5f9;
+  background-color: #0f172a;
+}
+
+html.dark:not(.theme-brand):not(.theme-china-red):not(.theme-japanese):not(.theme-middle-east):not(.theme-southeast-asia) body,
+html.dark:not(.theme-brand):not(.theme-china-red):not(.theme-japanese):not(.theme-middle-east):not(.theme-southeast-asia) #app {
+  background-color: #0f172a;
+}
+
+/* 默认深色下布局背景（覆盖 Tailwind dark:bg-gray-900） */
+html.dark:not(.theme-brand):not(.theme-china-red):not(.theme-japanese):not(.theme-middle-east):not(.theme-southeast-asia) .app-layout,
+html.dark:not(.theme-brand):not(.theme-china-red):not(.theme-japanese):not(.theme-middle-east):not(.theme-southeast-asia) .app-header,
+html.dark:not(.theme-brand):not(.theme-china-red):not(.theme-japanese):not(.theme-middle-east):not(.theme-southeast-asia) .app-sidebar,
+html.dark:not(.theme-brand):not(.theme-china-red):not(.theme-japanese):not(.theme-middle-east):not(.theme-southeast-asia) .tab-nav,
+html.dark:not(.theme-brand):not(.theme-china-red):not(.theme-japanese):not(.theme-middle-east):not(.theme-southeast-asia) .app-layout__content {
+  background-color: #1e293b !important;
+}
+
+/* ========== 品牌主题（CampusTop teal/slate）；Element Plus 变量见 theme-element-overrides.css ========== */
+html.theme-brand:not(.dark) body,
+html.theme-brand:not(.dark) #app {
+  background-color: #f8fafc;
+}
+
+html.theme-brand.dark body,
+html.theme-brand.dark #app {
+  background-color: #1e293b;
+}
+
+/* 品牌主题下布局背景（覆盖 Tailwind bg-white / dark:bg-gray-900） */
+html.theme-brand .app-layout,
+html.theme-brand .app-header,
+html.theme-brand .app-sidebar,
+html.theme-brand .tab-nav,
+html.theme-brand .app-layout__content {
+  background-color: #f8fafc !important;
+}
+
+html.theme-brand.dark .app-layout,
+html.theme-brand.dark .app-header,
+html.theme-brand.dark .app-sidebar,
+html.theme-brand.dark .tab-nav,
+html.theme-brand.dark .app-layout__content {
+  background-color: #1e293b !important;
+}
+
+/* ========== 中国红主题：页面与布局背景 ========== */
+html.theme-china-red:not(.dark) body,
+html.theme-china-red:not(.dark) #app {
+  background-color: #fef2f2;
+}
+
+html.theme-china-red.dark body,
+html.theme-china-red.dark #app {
+  background-color: #7f1d1d;
+}
+
+html.theme-china-red .app-layout,
+html.theme-china-red .app-header,
+html.theme-china-red .app-sidebar,
+html.theme-china-red .tab-nav,
+html.theme-china-red .app-layout__content {
+  background-color: #fef2f2 !important;
+}
+
+html.theme-china-red.dark .app-layout,
+html.theme-china-red.dark .app-header,
+html.theme-china-red.dark .app-sidebar,
+html.theme-china-red.dark .tab-nav,
+html.theme-china-red.dark .app-layout__content {
+  background-color: #7f1d1d !important;
+}
+
+/* ========== 日式主题：和纸浅色 / 靛蓝深色 ========== */
+html.theme-japanese:not(.dark) body,
+html.theme-japanese:not(.dark) #app {
+  background-color: #fafaf9;
+}
+html.theme-japanese.dark body,
+html.theme-japanese.dark #app {
+  background-color: #312e81;
+}
+html.theme-japanese .app-layout,
+html.theme-japanese .app-header,
+html.theme-japanese .app-sidebar,
+html.theme-japanese .tab-nav,
+html.theme-japanese .app-layout__content {
+  background-color: #fafaf9 !important;
+}
+html.theme-japanese.dark .app-layout,
+html.theme-japanese.dark .app-header,
+html.theme-japanese.dark .app-sidebar,
+html.theme-japanese.dark .tab-nav,
+html.theme-japanese.dark .app-layout__content {
+  background-color: #312e81 !important;
+}
+
+/* ========== 中东主题：沙色浅色 / 深琥珀深色 ========== */
+html.theme-middle-east:not(.dark) body,
+html.theme-middle-east:not(.dark) #app {
+  background-color: #fffbeb;
+}
+html.theme-middle-east.dark body,
+html.theme-middle-east.dark #app {
+  background-color: #78350f;
+}
+html.theme-middle-east .app-layout,
+html.theme-middle-east .app-header,
+html.theme-middle-east .app-sidebar,
+html.theme-middle-east .tab-nav,
+html.theme-middle-east .app-layout__content {
+  background-color: #fffbeb !important;
+}
+html.theme-middle-east.dark .app-layout,
+html.theme-middle-east.dark .app-header,
+html.theme-middle-east.dark .app-sidebar,
+html.theme-middle-east.dark .tab-nav,
+html.theme-middle-east.dark .app-layout__content {
+  background-color: #78350f !important;
+}
+
+/* ========== 东南亚主题：浅绿 / 深绿 ========== */
+html.theme-southeast-asia:not(.dark) body,
+html.theme-southeast-asia:not(.dark) #app {
+  background-color: #f0fdf4;
+}
+html.theme-southeast-asia.dark body,
+html.theme-southeast-asia.dark #app {
+  background-color: #14532d;
+}
+html.theme-southeast-asia .app-layout,
+html.theme-southeast-asia .app-header,
+html.theme-southeast-asia .app-sidebar,
+html.theme-southeast-asia .tab-nav,
+html.theme-southeast-asia .app-layout__content {
+  background-color: #f0fdf4 !important;
+}
+html.theme-southeast-asia.dark .app-layout,
+html.theme-southeast-asia.dark .app-header,
+html.theme-southeast-asia.dark .app-sidebar,
+html.theme-southeast-asia.dark .tab-nav,
+html.theme-southeast-asia.dark .app-layout__content {
+  background-color: #14532d !important;
+}

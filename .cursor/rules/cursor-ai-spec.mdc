@@ -1,0 +1,42 @@
+---
+description: Cursor/AI 开发约束 - 单应用、路由、接口、Mock、Store、样式与权限须符合项目规范
+globs: "**/*.vue, **/*.ts, **/*.tsx, **/*.scss, src/router/**/*, src/store/**/*, src/views/**/*, src/layout/**/*, src/api/**/*, src/utils/http.ts, vite.config.ts, build/**/*"
+---
+
+# Cursor / AI 开发规范（必读）
+
+在本项目中编写或修改代码时，**必须**遵循 `docs/DEVELOPMENT_STANDARDS.md` 中的全部约定。该文档为项目唯一开发规范，含布局、路由、接口与 Mock、Vite 配置、权限及自检清单。
+
+## 核心约束速览
+
+1. **单应用**：视图、布局、API、Mock 统一使用 `@/` 引用（如 `import('@/views/xxx.vue')`、`@/api`）；页面在 `src/views/`，API 在 `src/api/`，Mock 在 `src/mocks/`。
+2. **Layout**：layout 内部互相引用用 `@/layout/Xxx/index.vue`；递归组件（如 AppSidebarItem）必须 `defineOptions({ name: 'Xxx' })`。
+3. **keep-alive 页面**：需被 Tab 缓存的页面，路由须有 `name`，组件须 `defineOptions({ name: '路由 name' })` 且与路由 name 一致。
+4. **请求**：统一使用 `src/utils/http.ts` 封装的 Alova 实例，禁止在业务代码中使用裸 `fetch` 或 `axios`。
+5. **Mock**：新增接口必须配套 Mock，路径与响应结构与页面约定一致。
+6. **布局**：页面不设 min/max-width，宽度用 `w-full`，禁止横向滚动条；**el-table 列多时外层须包 `overflow-x-auto`**；详见 `docs/DEVELOPMENT_STANDARDS.md` 与本目录下 `frontend-layout.mdc`。
+7. **主题**：新增或修改 UI 均须支持浅色主题和暗色主题，背景/文字/边框/hover 使用 `dark:` 前缀；详见 `docs/DEVELOPMENT_STANDARDS.md` §3。
+8. **安全**：禁止 `v-html`，富文本使用 `v-dompurify-html`。
+9. **业务组件**：日历/排班/日程用 `@/components/BusinessCalendar`；富文本编辑用 `@/components/TinyMCE`；禁止引入其他同类库。
+10. **utils vs composables**：utils 禁止 import composables 或 store；composables 禁止 import 其他 composables。
+11. **表单**：新表单推荐 VeeValidate + Zod（`useVeeForm`）；旧表单可用 `formRules`；禁止混用。
+12. **Store**：用 `useUserStore`、`useAppStore` 等已有模块；权限用 `userStore.hasPermission`；异步/分页优先 `useStoreWithLoading`、`useStoreWithPagination`。
+13. **权限**：路由用 `meta.roles`/`meta.permissions`/`requireAuth`；视图用 `v-permission` 或 `userStore.hasPermission`。
+14. **类型**：不在业务中写 `any`；路由 meta 新字段在 `src/types/router.d.ts` 声明。
+15. **Vite**：根配置用 `defineConfig` 包装；build-only 插件加 `enforce: 'post'`。
+16. **Git 提交**（AI 协助时）：中文提交禁止 `-m "中文"`，须用 `git commit -F msg.txt`。
+
+## 自检清单（修改后必查）
+
+- [ ] 新接口是否已写 Mock 并聚合到 `src/mocks/handlers.ts`？Layout 递归组件是否已 `defineOptions({ name: 'Xxx' })`？
+- [ ] 需缓存的页面是否 `defineOptions({ name: '路由 name' })` 与路由 name 一致？
+- [ ] 是否使用了项目 http 而非 fetch/axios？
+- [ ] 布局是否无 min/max-width、无横向滚动？宽表格是否包 `overflow-x-auto`？
+- [ ] 主题：浅色与暗色下，背景、文字、边框、hover 是否均有对应样式？按钮内图标是否加 `text-gray-600 dark:text-gray-300`？
+- [ ] 是否未使用 `v-html`？富文本是否用 `v-dompurify-html`？
+- [ ] 日历/富文本是否用 BusinessCalendar、TinyMCEEditor？utils 是否未 import composables？
+- [ ] 权限是否用 meta 或 v-permission/userStore？
+- [ ] 修改 vite.config 时：是否用 defineConfig？build.target 已设置？build-only 插件加 enforce: 'post'？
+- [ ] Git 提交中文时是否用 `-F msg.txt` 而非 `-m`？
+
+完整规则、禁止项与自检清单见 **`docs/DEVELOPMENT_STANDARDS.md`**。
