@@ -28,7 +28,6 @@ import { piniaAnalytics } from '@/store/plugins/analytics';
 
 /** 启用 MSW mock，当 appConfig.enableMsw 为 true 时 */
 async function enableMocking(): Promise<void> {
-  if (!import.meta.env.DEV) return;
   const appConfig = getAppConfig();
   if (!appConfig?.enableMsw) return;
   const { worker, workerStartOptions } = await import('./mocks/browser');
@@ -36,7 +35,7 @@ async function enableMocking(): Promise<void> {
   await worker.start({
     serviceWorker: { url: `${base}mockServiceWorker.js` },
     ...workerStartOptions,
-    quiet: false,
+    quiet: import.meta.env.PROD,
   });
 }
 
