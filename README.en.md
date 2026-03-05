@@ -40,8 +40,7 @@ LiteVuePro is a **ready-to-use** Vue 3 enterprise-grade admin frontend framework
 
 ## Preview
 
-<!-- Uncomment and replace URL if you have an online preview -->
-<!-- **Live Demo**: [https://demo.example.com](https://demo.example.com) -->
+**Live Demo**: [https://lite-vue-pro.vercel.app](https://lite-vue-pro.vercel.app)
 
 | Light Theme | Dark Theme |
 |-------------|------------|
