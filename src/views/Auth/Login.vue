@@ -83,6 +83,7 @@
           label-position="top"
           size="large"
           class="campus-top-login-form"
+          @submit.prevent="onSubmitHandler"
         >
           <el-form-item :label="t('login.username')" :error="errors.username" class="campus-top-form-item">
             <el-input
@@ -108,7 +109,6 @@
               show-password
               clearable
               class="campus-top-login-input rounded-xl"
-              @keyup.enter="onSubmitHandler"
             >
               <template #prefix>
                 <Icon icon="mdi:lock-outline" class="text-gray-500 dark:text-gray-400 flex-shrink-0" :size="20" />
@@ -118,6 +118,7 @@
           <el-form-item class="campus-top-form-item mb-0 mt-2">
             <el-button
               type="primary"
+              native-type="button"
               class="campus-top-login-btn w-full h-12 rounded-xl font-semibold text-base transition-all duration-200 cursor-pointer"
               :loading="isSubmitting"
               @click="onSubmitHandler"
@@ -207,14 +208,13 @@ async function onSubmit() {
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&family=Source+Sans+3:wght@300;400;500;600;700&display=swap');
-
+/* 使用系统字体栈，避免 Google Fonts 国内不可用导致加载阻塞 */
 .font-heading {
-  font-family: 'Lexend', system-ui, sans-serif;
+  font-family: system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
 .font-body {
-  font-family: 'Source Sans 3', system-ui, sans-serif;
+  font-family: system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
 /* 暗色模式背景 */

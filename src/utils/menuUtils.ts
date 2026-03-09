@@ -140,3 +140,23 @@ export function buildMenuTree(
 
   return items.sort((a, b) => a.order - b.order);
 }
+
+/** API 菜单 VO 转为 MenuItem（与 api/auth AuthMenuVO 或 MenuVO 兼容） */
+export type ApiMenuVO = {
+  name: string;
+  path?: string;
+  icon?: string;
+  sort?: number;
+  children?: ApiMenuVO[];
+};
+export function apiMenuToMenuItem(vo: ApiMenuVO): MenuItem {
+  const hasChildren = Boolean(vo.children?.length);
+  return {
+    path: vo.path ?? '',
+    title: vo.name,
+    icon: vo.icon,
+    order: vo.sort ?? 100,
+    expandOnly: hasChildren ? true : undefined,
+    children: hasChildren ? vo.children!.map(c => apiMenuToMenuItem(c)) : undefined,
+  };
+}

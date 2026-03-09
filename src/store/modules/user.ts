@@ -80,6 +80,8 @@ export const useUserStore = defineStore('user', () => {
       const data = await loginApi(credentials);
       setToken(data.token, data.refreshToken);
       setUserInfo(data.user);
+      const { useDictStore } = await import('@/store/modules/dict');
+      await useDictStore().initDict();
       return { success: true };
     } catch (error) {
       console.error('[useUserStore] login error:', error);
@@ -106,22 +108,21 @@ export const useUserStore = defineStore('user', () => {
   }
 
   /**
-   * 刷新 Token
+   * 刷新 Token，失败时自动 logout
    */
   async function refreshAccessToken() {
+    if (!refreshToken.value) {
+      await logout();
+      throw new Error('No refresh token');
+    }
     try {
-      if (!refreshToken.value) {
-        throw new Error('No refresh token available');
-      }
-
-      // TODO: 调用 refreshTokenApi(refreshToken.value)
-      const newToken = `refreshed_token_${Date.now()}`;
-      setToken(newToken);
-
+      const { refreshTokenApi } = await import('@/api/auth');
+      const data = await refreshTokenApi(refreshToken.value);
+      setToken(data.token, data.refreshToken);
+      if (data.user) setUserInfo(data.user);
       return { success: true };
     } catch (error) {
       console.error('[useUserStore] refreshAccessToken error:', error);
-      // 刷新失败，登出
       await logout();
       throw error;
     }

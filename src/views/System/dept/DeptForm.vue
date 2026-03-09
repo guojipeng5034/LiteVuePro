@@ -6,6 +6,7 @@
       :model="formData"
       :rules="formRules"
       label-width="80px"
+      @submit.prevent="submitForm"
     >
       <el-form-item label="上级部门" prop="parentId">
         <el-tree-select
@@ -52,7 +53,7 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button type="primary" @click="submitForm">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" native-type="button" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </el-dialog>
@@ -123,12 +124,14 @@ defineExpose({ open });
 const emit = defineEmits<{ (e: 'success'): void }>();
 const submitForm = async () => {
   if (!formRef.value) return;
+  if (formLoading.value) return;
+  formLoading.value = true;
   try {
     await formRef.value.validate();
   } catch {
+    formLoading.value = false;
     return;
   }
-  formLoading.value = true;
   try {
     const data = formData.value as unknown as DeptApi.DeptVO;
     if (formType.value === 'create') {

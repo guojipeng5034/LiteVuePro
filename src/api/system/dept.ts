@@ -41,7 +41,9 @@ export function getSimpleDeptList() {
 
 /** 新增部门 */
 export function createDept(data: DeptVO) {
-  return alovaInstance.Post<number>('/api/system/dept/create', data).send();
+  return alovaInstance
+    .Post<number>('/api/system/dept/create', data, { config: { dedupKey: 'dept-create' } })
+    .send();
 }
 
 /** 修改部门 */

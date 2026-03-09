@@ -30,7 +30,7 @@
           <el-form-item label="状态" prop="status">
             <el-select v-model="queryParams.status" class="!w-240px" clearable placeholder="请选择状态">
               <el-option
-                v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+                v-for="dict in getIntDictOptions(DICT_TYPE.USER_STATUS)"
                 :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"
@@ -38,6 +38,13 @@
             </el-select>
           </el-form-item>
           <el-form-item>
+            <el-button
+              v-permission="['system:user:create']"
+              type="primary"
+              @click="handleCreate"
+            >
+              <Icon class="mr-5px text-inherit" icon="ep:plus" /> 新增
+            </el-button>
             <el-button class="text-gray-600 dark:text-gray-300" @click="handleQuery">
               <Icon class="mr-5px text-inherit" icon="ep:search" /> 搜索
             </el-button>
@@ -67,7 +74,7 @@
           <el-table-column align="center" label="手机号" prop="mobile" min-width="120" />
           <el-table-column align="center" label="状态" prop="status" width="90">
             <template #default="scope">
-              <DictTag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+              <DictTag :type="DICT_TYPE.USER_STATUS" :value="scope.row.status" />
             </template>
           </el-table-column>
           <el-table-column
@@ -77,8 +84,16 @@
             width="180"
             :formatter="(row: unknown, _col: unknown, val: string) => dateFormatter(row, _col, val)"
           />
-          <el-table-column :width="120" align="center" label="操作" fixed="right">
+          <el-table-column :width="160" align="center" label="操作" fixed="right">
             <template #default="scope">
+              <el-button
+                v-permission="['system:user:update']"
+                link
+                type="primary"
+                @click="handleEdit(scope.row.id)"
+              >
+                编辑
+              </el-button>
               <el-button
                 v-permission="['system:user:delete']"
                 link
@@ -102,6 +117,7 @@
         @size-change="getList"
       />
     </div>
+    <UserForm ref="formRef" @success="getList" />
   </div>
 </template>
 
@@ -111,6 +127,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict';
 import { dateFormatter } from '@/utils/formatTime';
 import * as UserApi from '@/api/system/user';
 import DictTag from '@/components/DictTag/index.vue';
+import UserForm from './UserForm.vue';
 import { useMessage } from '@/hooks/useMessage';
 
 defineOptions({ name: 'SystemUser' });
@@ -129,6 +146,15 @@ const queryParams = reactive({
   status: undefined as number | undefined,
 });
 const queryFormRef = ref();
+const formRef = ref<InstanceType<typeof UserForm>>();
+
+const handleCreate = () => {
+  formRef.value?.open('create');
+};
+
+const handleEdit = (id: number) => {
+  formRef.value?.open('update', id);
+};
 
 const getList = async () => {
   loading.value = true;

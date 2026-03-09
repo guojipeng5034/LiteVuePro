@@ -43,7 +43,9 @@ export function getRole(id: number) {
 
 /** 新增 */
 export function createRole(data: RoleVO) {
-  return alovaInstance.Post<number>('/api/system/role/create', data).send();
+  return alovaInstance
+    .Post<number>('/api/system/role/create', data, { config: { dedupKey: 'role-create' } })
+    .send();
 }
 
 /** 修改 */

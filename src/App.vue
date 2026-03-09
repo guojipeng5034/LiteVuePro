@@ -9,14 +9,20 @@
 </template>
 
 <script setup lang="ts">
-import { watch } from 'vue';
+import { onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import GlobalLoading from '@/components/GlobalLoading/index.vue';
 import { useAppStore } from '@/store/modules/app';
+import { useUserStore } from '@/store/modules/user';
+import { useDictStore } from '@/store/modules/dict';
 import { setDayjsLocale } from '@/utils/dayjs';
 import { useRouteLoading } from '@/composables/useRouteLoading';
 
 const { locale } = useI18n();
+
+onMounted(() => {
+  if (useUserStore().isLoggedIn) useDictStore().initDict();
+});
 // 尽早注册路由导航钩子，供 Layout 骨架屏使用
 useRouteLoading();
 const appStore = useAppStore();

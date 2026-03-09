@@ -12,13 +12,14 @@
       :model="formData"
       :rules="formRules"
       label-width="100px"
+      @submit.prevent="submitForm"
     >
       <el-form-item label="上级菜单">
         <el-tree-select
           v-model="formData.parentId"
           :data="menuTree"
           :default-expanded-keys="[0]"
-          :props="defaultProps"
+          :props="{ ...defaultProps, disabled: (data: { id?: number; type?: number }) => formData.value.type === SystemMenuTypeEnum.BUTTON && (data?.id === 0 || data?.type === SystemMenuTypeEnum.DIR) }"
           check-strictly
           node-key="id"
           class="w-full"
@@ -127,7 +128,7 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" native-type="button" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </el-dialog>
@@ -151,6 +152,7 @@ defineOptions({ name: 'SystemMenuForm' });
 interface Tree {
   id: number;
   name: string;
+  type?: number;
   children?: Tree[];
 }
 
@@ -209,15 +211,19 @@ const open = async (type: string, id?: number, parentId?: number) => {
   const root: Tree = { id: 0, name: '主类目', children: handleTree(arr, 'id', 'parentId', 'children') };
   menuTree.value = [root];
 };
+
 defineExpose({ open });
 
 const emit = defineEmits<(e: 'success') => void>();
 
 const submitForm = async () => {
   if (!formRef.value) return;
+  if (formLoading.value) return;
+  formLoading.value = true;
   try {
     await formRef.value.validate();
   } catch {
+    formLoading.value = false;
     return;
   }
   if (
@@ -226,14 +232,15 @@ const submitForm = async () => {
   ) {
     if (formData.value.parentId === 0 && formData.value.path.charAt(0) !== '/') {
       ElMessage.error('路径必须以 / 开头');
+      formLoading.value = false;
       return;
     }
     if (formData.value.parentId !== 0 && formData.value.path.charAt(0) === '/') {
       ElMessage.error('路径不能以 / 开头');
+      formLoading.value = false;
       return;
     }
   }
-  formLoading.value = true;
   try {
     const data = formData.value as unknown as MenuVO;
     if (formType.value === 'create') {

@@ -20,7 +20,7 @@
   ],
   "type": "module",
   "scripts": {
-    "dev": "vite --mode env.local",
+    "dev": "vite --mode dev",
     "build:local": "node ./scripts/update-version-json.js && node --max_old_space_size=4096 ./node_modules/vite/bin/vite.js build",
     "build:dev": "node ./scripts/update-version-json.js && node --max_old_space_size=4096 ./node_modules/vite/bin/vite.js build --mode dev",
     "build:test": "node ./scripts/update-version-json.js && node --max_old_space_size=4096 ./node_modules/vite/bin/vite.js build --mode test",

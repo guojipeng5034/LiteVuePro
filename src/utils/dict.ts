@@ -1,6 +1,10 @@
 /**
- * 数据字典工具类（静态字典，不依赖 dict store）
+ * 数据字典工具类
+ * - 优先使用登录后 API 初始化的数据（由 dict store 注入到 dictOverrides）
+ * - 否则回退到 STATIC_DICT
  */
+import { getDictOverrides } from './dictOverrides';
+
 export interface DictDataType {
   dictType: string;
   label: string;
@@ -23,6 +27,11 @@ const STATIC_DICT: Record<string, DictDataType[]> = {
     { dictType: 'common_status', label: '启用', value: 0, colorType: 'success', cssClass: '' },
     { dictType: 'common_status', label: '关闭', value: 1, colorType: 'danger', cssClass: '' },
   ],
+  /** 用户状态：sys_user 表 1=正常 0=禁用，与 common_status 相反 */
+  user_status: [
+    { dictType: 'user_status', label: '启用', value: 1, colorType: 'success', cssClass: '' },
+    { dictType: 'user_status', label: '禁用', value: 0, colorType: 'danger', cssClass: '' },
+  ],
   system_menu_type: [
     { dictType: 'system_menu_type', label: '目录', value: 1, colorType: '', cssClass: '' },
     { dictType: 'system_menu_type', label: '菜单', value: 2, colorType: '', cssClass: '' },
@@ -42,6 +51,8 @@ const STATIC_DICT: Record<string, DictDataType[]> = {
 };
 
 export function getDictOptions(dictType: string): DictDataType[] {
+  const map = getDictOverrides();
+  if (map[dictType]?.length) return map[dictType];
   return STATIC_DICT[dictType] ?? [];
 }
 
@@ -82,6 +93,7 @@ export function getDictLabel(dictType: string, value: unknown): string {
 export const DICT_TYPE = {
   USER_TYPE: 'user_type',
   COMMON_STATUS: 'common_status',
+  USER_STATUS: 'user_status',
   TERMINAL: 'terminal',
   DATE_INTERVAL: 'date_interval',
   SYSTEM_USER_SEX: 'system_user_sex',

@@ -18,7 +18,9 @@ declare global {
   const STATUS_ID_TO_LABEL: typeof import('../src/composables/useCalendarData').STATUS_ID_TO_LABEL
   const SystemDataScopeEnum: typeof import('../src/utils/constants').SystemDataScopeEnum
   const SystemMenuTypeEnum: typeof import('../src/utils/constants').SystemMenuTypeEnum
+  const UserStatusEnum: typeof import('../src/utils/constants').UserStatusEnum
   const alovaInstance: typeof import('../src/utils/http').alovaInstance
+  const apiMenuToMenuItem: typeof import('../src/utils/menuUtils').apiMenuToMenuItem
   const buildMenuTree: typeof import('../src/utils/menuUtils').buildMenuTree
   const checkSelectedNode: typeof import('../src/utils/tree').checkSelectedNode
   const computed: typeof import('vue').computed
@@ -68,6 +70,7 @@ declare global {
   const getDictLabel: typeof import('../src/utils/dict').getDictLabel
   const getDictObj: typeof import('../src/utils/dict').getDictObj
   const getDictOptions: typeof import('../src/utils/dict').getDictOptions
+  const getDictOverrides: typeof import('../src/utils/dictOverrides').getDictOverrides
   const getGrowthBook: typeof import('../src/utils/analytics').getGrowthBook
   const getIntDictOptions: typeof import('../src/utils/dict').getIntDictOptions
   const getNow: typeof import('../src/utils/serverTime').getNow
@@ -119,6 +122,7 @@ declare global {
   const resolveComponent: typeof import('vue').resolveComponent
   const serverTime: typeof import('../src/utils/serverTime').default
   const setDayjsLocale: typeof import('../src/utils/dayjs').setDayjsLocale
+  const setDictOverrides: typeof import('../src/utils/dictOverrides').setDictOverrides
   const setupI18n: typeof import('../src/utils/i18n').setupI18n
   const shallowReactive: typeof import('vue').shallowReactive
   const shallowReadonly: typeof import('vue').shallowReadonly
@@ -180,7 +184,7 @@ declare global {
   export type { ReportContext } from '../src/utils/errorReport'
   import('../src/utils/errorReport')
   // @ts-ignore
-  export type { MenuItem } from '../src/utils/menuUtils'
+  export type { MenuItem, ApiMenuVO } from '../src/utils/menuUtils'
   import('../src/utils/menuUtils')
   // @ts-ignore
   export type { FetchServerTime, ServerTimeInitOptions } from '../src/utils/serverTime'

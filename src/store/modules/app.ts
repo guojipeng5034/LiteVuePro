@@ -38,6 +38,8 @@ export const useAppStore = defineStore('app', () => {
   const device = ref<'desktop' | 'tablet' | 'mobile'>('desktop');
   const globalLoading = ref<boolean>(false);
   const pageLoading = ref<boolean>(false);
+  /** 递增以触发侧栏 API 菜单重新拉取（菜单 CRUD 后调用） */
+  const menuInvalidateVersion = ref<number>(0);
 
   // ===== Getters =====
   const isMobile = computed(() => device.value === 'mobile');
@@ -183,6 +185,13 @@ export const useAppStore = defineStore('app', () => {
   }
 
   /**
+   * 使侧栏 API 菜单失效并重新拉取（菜单 CRUD 后调用）
+   */
+  function invalidateMenuCache() {
+    menuInvalidateVersion.value += 1;
+  }
+
+  /**
    * 初始化应用状态
    */
   function initApp() {
@@ -210,6 +219,7 @@ export const useAppStore = defineStore('app', () => {
     device,
     globalLoading,
     pageLoading,
+    menuInvalidateVersion,
     // getters
     isMobile,
     isTablet,
@@ -234,6 +244,7 @@ export const useAppStore = defineStore('app', () => {
     detectDevice,
     setGlobalLoading,
     setPageLoading,
+    invalidateMenuCache,
     initApp,
   };
 }, {

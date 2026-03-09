@@ -81,7 +81,7 @@
       </div>
     </div>
 
-    <MenuForm ref="formRef" @success="getList" />
+    <MenuForm ref="formRef" @success="onMenuFormSuccess" />
   </div>
 </template>
 
@@ -94,20 +94,52 @@ import { handleTree } from '@/utils/tree';
 import { getMenuList, deleteMenu, updateMenu, type MenuVO } from '@/api';
 import MenuForm from './MenuForm.vue';
 import { ElButton, ElSwitch, ElTag, TableV2FixedDir } from 'element-plus';
+import { useAppStore } from '@/store/modules/app';
 import { useUserStore } from '@/store/modules/user';
-import { CommonStatusEnum } from '@/utils/constants';
+import { CommonStatusEnum, SystemMenuTypeEnum } from '@/utils/constants';
 
 defineOptions({ name: 'SystemMenu' });
+
+const MENU_TYPE_LABELS: Record<number, { label: string; tagType: 'primary' | 'success' | 'info' }> = {
+  [SystemMenuTypeEnum.DIR]: { label: '目录', tagType: 'primary' },
+  [SystemMenuTypeEnum.MENU]: { label: '菜单', tagType: 'success' },
+  [SystemMenuTypeEnum.BUTTON]: { label: '按钮', tagType: 'info' },
+};
+
+/** 递归按 目录→菜单→按钮 排序，同级内再按 sort */
+function sortMenuTree(nodes: MenuVO[]): MenuVO[] {
+  if (!nodes?.length) return nodes;
+  const sorted = [...nodes].sort((a, b) => {
+    const t = (a.type ?? 0) - (b.type ?? 0);
+    if (t !== 0) return t;
+    return (a.sort ?? 0) - (b.sort ?? 0);
+  });
+  return sorted.map((n) => ({
+    ...n,
+    children: n.children?.length ? sortMenuTree(n.children) : undefined,
+  }));
+}
 
 const userStore = useUserStore();
 const { t } = useI18n();
 
 const columns = [
   {
+    key: 'type',
+    title: '类型',
+    dataKey: 'type',
+    width: 90,
+    fixed: TableV2FixedDir.LEFT,
+    cellRenderer: ({ cellData: type }: { cellData?: number }) => {
+      const cfg = MENU_TYPE_LABELS[type ?? 0] ?? { label: '-', tagType: 'info' as const };
+      return h(ElTag, { type: cfg.tagType, size: 'small' }, () => cfg.label);
+    },
+  },
+  {
     key: 'name',
     title: '菜单名称',
     dataKey: 'name',
-    width: 250,
+    width: 220,
     fixed: TableV2FixedDir.LEFT,
   },
   {
@@ -206,7 +238,7 @@ const getList = async () => {
   loading.value = true;
   try {
     const data = await getMenuList(queryParams);
-    list.value = handleTree(Array.isArray(data) ? data : [], 'id', 'parentId', 'children');
+    list.value = sortMenuTree(handleTree(Array.isArray(data) ? data : [], 'id', 'parentId', 'children'));
   } finally {
     loading.value = false;
   }
@@ -219,6 +251,7 @@ const resetQuery = () => {
   handleQuery();
 };
 
+const appStore = useAppStore();
 const formRef = ref<InstanceType<typeof MenuForm>>();
 const openForm = (type: string, id?: number, parentId?: number) => {
   formRef.value?.open(type, id, parentId);
@@ -233,16 +266,15 @@ const toggleExpandAll = () => {
   isExpandAll.value = !isExpandAll.value;
 };
 
-const refreshMenu = async () => {
-  try {
-    await ElMessageBox.confirm('即将刷新浏览器以更新菜单缓存', '刷新菜单缓存', {
-      confirmButtonText: t('common.confirm'),
-      cancelButtonText: t('common.cancel'),
-    });
-    location.reload();
-  } catch {
-    // 用户取消
-  }
+const refreshMenu = () => {
+  appStore.invalidateMenuCache();
+  getList();
+  ElMessage.success('菜单缓存已刷新');
+};
+
+const onMenuFormSuccess = () => {
+  getList();
+  appStore.invalidateMenuCache();
 };
 
 const handleDelete = async (id: number) => {
@@ -255,6 +287,7 @@ const handleDelete = async (id: number) => {
     await deleteMenu(id);
     ElMessage.success(t('common.delSuccess'));
     await getList();
+    appStore.invalidateMenuCache();
   } catch {
     // 用户取消或请求失败
   }
@@ -264,6 +297,8 @@ const handleStatusChanged = async (menu: MenuVO, val: number) => {
   menuStatusUpdating.value[menu.id] = true;
   try {
     await updateMenu({ ...menu, status: val });
+    await getList();
+    appStore.invalidateMenuCache();
   } finally {
     menuStatusUpdating.value[menu.id] = false;
   }

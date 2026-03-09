@@ -1,6 +1,6 @@
 <template>
   <el-dialog v-model="dialogVisible" title="菜单权限" append-to-body>
-    <el-form ref="formRef" v-loading="formLoading" :model="formData" label-width="80px">
+    <el-form ref="formRef" v-loading="formLoading" :model="formData" label-width="80px" @submit.prevent="submitForm">
       <el-form-item label="角色名称">
         <el-tag>{{ formData.name }}</el-tag>
       </el-form-item>
@@ -39,7 +39,7 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" native-type="button" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </el-dialog>
@@ -95,6 +95,7 @@ defineExpose({ open });
 
 const emit = defineEmits<{ (e: 'success'): void }>();
 const submitForm = async () => {
+  if (formLoading.value) return;
   formLoading.value = true;
   try {
     const checked = (treeRef.value?.getCheckedKeys(false) ?? []) as number[];

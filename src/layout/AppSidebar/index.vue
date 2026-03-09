@@ -60,12 +60,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/store/modules/user';
 import { useAppStore } from '@/store/modules/app';
-import { buildMenuTree, type MenuItem } from '@/utils/menuUtils';
+import { getAppConfig } from '@/utils/appConfig';
+import { buildMenuTree, apiMenuToMenuItem, type MenuItem } from '@/utils/menuUtils';
 // layout 子组件引用
 import AppSidebarItem from '@/layout/AppSidebarItem/index.vue';
 import logoLightSrc from '@/assets/images/LiteVueProLogo-light.webm';
@@ -88,7 +89,29 @@ const layoutRoute = computed(() => {
   return routes.find(r => r.path === '/' && r.children?.length);
 });
 
+/** API 菜单项（useApiMenu 时从 GET /api/auth/menus 拉取） */
+const apiMenuItems = ref<MenuItem[]>([]);
+
+watchEffect(async () => {
+  if (!getAppConfig().useApiMenu || !userStore.isLoggedIn) {
+    apiMenuItems.value = [];
+    return;
+  }
+  void appStore.menuInvalidateVersion; // 依赖：菜单 CRUD 后 invalidateMenuCache() 触发重拉
+  try {
+    const { getAuthMenusApi } = await import('@/api/auth');
+    const list = await getAuthMenusApi();
+    apiMenuItems.value = (list ?? []).map(apiMenuToMenuItem);
+  } catch {
+    apiMenuItems.value = [];
+  }
+});
+
 const menuTree = computed<MenuItem[]>(() => {
+  const useApiMenu = getAppConfig().useApiMenu ?? false;
+  if (useApiMenu && userStore.isLoggedIn && apiMenuItems.value.length > 0) {
+    return [...apiMenuItems.value].sort((a, b) => a.order - b.order);
+  }
   const layout = layoutRoute.value;
   if (!layout?.children?.length) return [];
   return buildMenuTree(layout.children as import('vue-router').RouteRecordNormalized[], userStore);

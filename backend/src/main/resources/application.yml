@@ -1,0 +1,82 @@
+spring:
+  application:
+    name: litevuepro-backend
+  # Virtual Threads (Java 21)，ADR-005 必须
+  threads:
+    virtual:
+      enabled: true
+  # Datasource - 连接本地 MySQL，数据库名 litevuepro，可通过 MCP 或手动创建
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/litevuepro?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: ${MYSQL_PASS:123456}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 50
+      minimum-idle: 5
+  jpa:
+    hibernate:
+      ddl-auto: validate  # Flyway 管理 schema
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 3
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+  cache:
+    type: redis
+
+server:
+  port: 3001
+
+# JWT
+jwt:
+  secret: ${JWT_SECRET:LiteVuePro-Backend-Secret-Key-For-JWT-Min32Chars}
+  expiration-ms: 86400000        # access token 24h
+  refresh-expiration-ms: 604800000  # refresh token 7d
+
+# CORS - 前端开发地址（Vite 默认 3000，也可用 5173）
+cors:
+  allowed-origins: http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173
+
+# 限流（Resilience4j）
+resilience4j:
+  ratelimiter:
+    instances:
+      api:
+        limitForPeriod: 100
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
+
+# OpenAPI
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+---
+# 开发 profile：确保 admin/123456 可登录
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+---
+# 无 Redis 开发：排除 Redis 自动配置，使用内存缓存
+spring:
+  config:
+    activate:
+      on-profile: dev-no-redis
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+  cache:
+    type: none

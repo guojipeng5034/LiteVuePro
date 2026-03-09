@@ -271,17 +271,35 @@ defineOptions({ name: 'AppSidebarItem' });
 - **Token 与 401**：Token 从 User Store 读取并注入请求头；401 由全局未授权处理器处理（登出并跳转登录），业务代码不重复处理 401。
 - **Loading**：全局请求计数与 `appStore.globalLoading` 已集成，无需在页面内为通用请求再写全屏 Loading。
 
-### 8.2 Mock
+### 9.2 接口缓存约定
+
+- **默认不缓存**：`src/utils/http.ts` 中 Alova 实例已设置 `cacheFor: null`，**所有接口默认不缓存**，增删改后数据即时反映。
+- **需缓存时显式添加**：仅对确有需求、数据变动频率低的接口（如字典树、静态配置等）在 method 配置中显式添加 `cacheFor: number`（毫秒）。
+- **禁止**：在未评估数据 freshness 需求的情况下为接口启用缓存。
+
+### 9.3 Mock
 
 - **默认要求**：为页面使用的接口**配套 Mock**，且 Mock 与接口约定一致（路径、方法、请求体/查询参数、响应结构含列表/分页/状态码等）。
 - **组织方式**：`src/mocks/` 下按模块建文件（如 `demo.ts`、`auth.ts`），导出 `xxxHandlers`，在 `handlers.ts` 中聚合为 `handlers`。
 - **启用条件**：开发环境且 `app.config.ts` 中 `enableMsw: true` 时才会启动 MSW。
 
-### 9.3 表单校验（VeeValidate + Zod / formRules）
+### 9.4 表单校验（VeeValidate + Zod / formRules）
 
 - **新表单推荐**：使用 **VeeValidate + Zod**（`useForm`、`toTypedSchema`、`defineField`），声明式 Schema、TS 类型推导、与 Element Plus 通过 `:error="errors.xxx"` 集成。示例见 `Login.vue`，导出见 `src/composables/useVeeForm.ts`。
 - **旧表单兼容**：`formRules`（`@/utils/formRules`）与 Element 的 `el-form` `:rules` 仍可用，无需强制迁移。
 - **禁止**：混用两者于同一表单；utils 中不引入 composables（见 §5.6）。
+
+### 9.5 el-form 防重复提交
+
+使用 `el-form` 的弹窗表单**必须**做到以下三点，避免 Enter + 点击或快速双击导致重复提交：
+
+| 约定 | 说明 |
+|------|------|
+| `@submit.prevent="submitForm"` | 阻止原生 form submit，由我们统一处理；Enter 键也会走同一逻辑 |
+| 确定按钮 `native-type="button"` | 避免按钮触发表单原生提交，否则点击会同时触发 `@click` 和 form submit |
+| `formLoading` 在 `validate` 之前置 true | 在 `submitForm` 开头立即 `formLoading.value = true`，`validate` 失败时在 catch 中复位 |
+
+示例：`UserForm.vue`、`DeptForm.vue`。
 
 ---
 
@@ -383,6 +401,7 @@ defineOptions({ name: 'AppSidebarItem' });
 - **按钮内图标**与文字颜色不一致，或图标无颜色类导致暗色下看不清；应遵守 §3.3.1（图标与文字同色）。
 - **SCSS**：在 `<style lang="scss">` 中使用 `@use 'styles/xxx.scss'`；应使用 `@use 'styles/xxx.scss'`。
 - 在业务代码中直接使用 `fetch`/`axios` 或新建 Alova 实例，绕过 `src/utils/http.ts`。
+- **接口缓存**：在未明确评估 freshness 需求的情况下为接口启用缓存（`cacheFor > 0`）；新增接口默认缓存；见 §9.2。
 - 使用 `v-html` 渲染不可信内容。
 - 新增接口不配套 Mock，或 Mock 路径/响应与页面约定不一致。
 - 在 Store 或路由中重复实现权限判断，而不使用 `userStore.hasPermission` 与 `meta.permissions`。
@@ -399,7 +418,7 @@ defineOptions({ name: 'AppSidebarItem' });
 1. **放置**：页面在 `src/views/`，API 在 `src/api/`，Mock 在 `src/mocks/` 并聚合到 `handlers.ts`。
 2. **Layout**：Layout 子组件互相引用使用 `@/layout/Xxx/index.vue`；**递归的 Layout 子组件已 `defineOptions({ name: 'Xxx' })`**；**SCSS 中用 `@use 'styles/xxx.scss'`**。
 3. **路由**：页面使用 `() => import('@/views/...')`；meta 需权限时已设 `roles`/`permissions`/`requireAuth`。
-4. **请求**：使用封装的 http（Alova），未使用裸 fetch/axios。
+4. **请求**：使用封装的 http（Alova），未使用裸 fetch/axios；接口默认不缓存（http 层已设 `cacheFor: null`），需缓存时在 method 上显式添加 `cacheFor`。
 5. **Mock**：新接口已配套 Mock，路径与响应结构与约定一致。
 6. **布局**：无 min/max-width，无横向滚动条，宽度用 w-full，滚动区用 overflow-auto；**宽表格**使用外层 `overflow-x-auto` 容器（§1.5）。
 7. **主题**：浅色与暗色下，背景、文字、边框、hover 均有对应样式；自定义 slot 内文字在暗色下可读；**按钮内图标与文字须同色**（§3.3.1）。

@@ -57,7 +57,9 @@ export function getSimpleMenusList() {
 
 /** 新增菜单 */
 export function createMenu(data: MenuVO) {
-  return alovaInstance.Post<number>('/api/system/menu/create', data).send();
+  return alovaInstance
+    .Post<number>('/api/system/menu/create', data, { config: { dedupKey: 'menu-create' } })
+    .send();
 }
 
 /** 修改菜单 */

@@ -25,9 +25,16 @@ export interface ApiResponse<T = unknown> {
   data?: T;
 }
 
-/** 登录 POST /api/auth/login（拦截器返回 data 部分，故泛型为 LoginResponse） */
+/** 登录 POST /api/auth/login（dedupKey 防重复提交） */
 export function loginApi(params: LoginParams) {
-  return alovaInstance.Post<LoginResponse>('/api/auth/login', params).send();
+  return alovaInstance
+    .Post<LoginResponse>('/api/auth/login', params, { config: { dedupKey: 'auth-login' } })
+    .send();
+}
+
+/** 刷新 Token POST /api/auth/refresh */
+export function refreshTokenApi(refreshToken: string) {
+  return alovaInstance.Post<LoginResponse>('/api/auth/refresh', { refreshToken }).send();
 }
 
 /** 获取当前用户信息（含角色、权限）GET /api/auth/user */
@@ -35,7 +42,23 @@ export function getUserInfoApi() {
   return alovaInstance.Get<UserInfo>('/api/auth/user').send();
 }
 
-/** 登出 POST /api/auth/logout */
+/** 当前用户菜单树 GET /api/auth/menus（与 api/system MenuVO 一致） */
+export function getAuthMenusApi() {
+  return alovaInstance.Get<AuthMenuVO[]>('/api/auth/menus').send();
+}
+
+export interface AuthMenuVO {
+  id: number;
+  name: string;
+  path: string;
+  icon?: string;
+  sort: number;
+  children?: AuthMenuVO[];
+}
+
+/** 登出 POST /api/auth/logout（dedupKey 防重复提交） */
 export function logoutApi() {
-  return alovaInstance.Post<void>('/api/auth/logout').send();
+  return alovaInstance
+    .Post<void>('/api/auth/logout', undefined, { config: { dedupKey: 'auth-logout' } })
+    .send();
 }

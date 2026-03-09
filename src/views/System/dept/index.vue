@@ -104,6 +104,7 @@
                 修改
               </el-button>
               <el-button
+                :disabled="deletingId === scope.row.id"
                 link
                 type="danger"
                 @click="handleDelete(scope.row.id)"
@@ -138,6 +139,7 @@ const message = useMessage();
 const { t } = useI18n();
 
 const loading = ref(true);
+const deletingId = ref<number | null>(null);
 const list = ref<DeptApi.DeptVO[]>([]);
 const queryParams = reactive({
   pageNo: 1,
@@ -182,11 +184,17 @@ const openForm = (type: string, id?: number) => {
 };
 
 const handleDelete = async (id: number) => {
+  if (deletingId.value === id) return;
   try {
     await message.delConfirm();
-    await DeptApi.deleteDept(id);
-    message.success(t('common.delSuccess'));
-    await getList();
+    deletingId.value = id;
+    try {
+      await DeptApi.deleteDept(id);
+      message.success(t('common.delSuccess'));
+      await getList();
+    } finally {
+      deletingId.value = null;
+    }
   } catch {
     // 用户取消
   }

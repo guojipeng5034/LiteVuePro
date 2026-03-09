@@ -1,0 +1,19 @@
+# 测试环境：高限流、无 Redis
+jwt:
+  secret: test-secret
+  expiration-ms: 86400000
+  refresh-expiration-ms: 604800000
+
+spring:
+  cache:
+    type: simple
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+
+resilience4j:
+  ratelimiter:
+    instances:
+      api:
+        limitForPeriod: 10000
+        limitRefreshPeriod: 1s

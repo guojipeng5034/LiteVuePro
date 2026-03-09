@@ -21,11 +21,13 @@ const deptList: { id: number; parentId: number; name: string; sort: number; lead
 ];
 
 // 用户列表 Mock（含分页字段）
-const userList: { id: number; username: string; nickname: string; deptName?: string; mobile?: string; status: number; createTime: string }[] = [
-  { id: 1, username: 'admin', nickname: '管理员', deptName: '总公司', mobile: '13800138000', status: 0, createTime: '2024-01-01 00:00:00' },
-  { id: 2, username: 'test', nickname: '测试用户', deptName: '研发部', mobile: '13800138001', status: 0, createTime: '2024-01-02 00:00:00' },
-  { id: 3, username: 'demo', nickname: '演示账号', deptName: '市场部', mobile: '13800138002', status: 0, createTime: '2024-01-03 00:00:00' },
+type UserMock = { id: number; username: string; nickname: string; deptId?: number; deptName?: string; mobile?: string; status: number; createTime: string };
+const userList: UserMock[] = [
+  { id: 1, username: 'admin', nickname: '管理员', deptId: 1, deptName: '总公司', mobile: '13800138000', status: 0, createTime: '2024-01-01 00:00:00' },
+  { id: 2, username: 'test', nickname: '测试用户', deptId: 2, deptName: '研发部', mobile: '13800138001', status: 0, createTime: '2024-01-02 00:00:00' },
+  { id: 3, username: 'demo', nickname: '演示账号', deptId: 3, deptName: '市场部', mobile: '13800138002', status: 0, createTime: '2024-01-03 00:00:00' },
 ];
+const userRoleIds: Record<number, number[]> = { 1: [1], 2: [2], 3: [2] };
 
 // 字典类型 Mock
 const dictTypeList: { id: number; name: string; type: string; status: number; remark?: string; createTime: string }[] = [
@@ -37,6 +39,18 @@ const dictTypeList: { id: number; name: string; type: string; status: number; re
 const dictDataList: { id: number; dictType: string; label: string; value: string; sort: number; status: number; colorType?: string; cssClass?: string; remark?: string; createTime: string }[] = [
   { id: 1, dictType: 'common_status', label: '启用', value: '0', sort: 0, status: 0, colorType: 'success', createTime: '2024-01-01 00:00:00' },
   { id: 2, dictType: 'common_status', label: '关闭', value: '1', sort: 1, status: 0, colorType: 'danger', createTime: '2024-01-01 00:00:00' },
+  { id: 3, dictType: 'system_menu_type', label: '目录', value: '1', sort: 0, status: 0, createTime: '2024-01-01 00:00:00' },
+  { id: 4, dictType: 'system_menu_type', label: '菜单', value: '2', sort: 1, status: 0, createTime: '2024-01-01 00:00:00' },
+  { id: 5, dictType: 'system_menu_type', label: '按钮', value: '3', sort: 2, status: 0, createTime: '2024-01-01 00:00:00' },
+  { id: 6, dictType: 'system_role_type', label: '内置角色', value: '1', sort: 0, status: 0, colorType: 'danger', createTime: '2024-01-01 00:00:00' },
+  { id: 7, dictType: 'system_role_type', label: '自定义角色', value: '2', sort: 1, status: 0, colorType: 'primary', createTime: '2024-01-01 00:00:00' },
+  { id: 8, dictType: 'system_data_scope', label: '全部数据', value: '1', sort: 0, status: 0, createTime: '2024-01-01 00:00:00' },
+  { id: 9, dictType: 'system_data_scope', label: '本部门及以下', value: '2', sort: 1, status: 0, createTime: '2024-01-01 00:00:00' },
+  { id: 10, dictType: 'system_data_scope', label: '本部门', value: '3', sort: 2, status: 0, createTime: '2024-01-01 00:00:00' },
+  { id: 11, dictType: 'system_data_scope', label: '仅本人', value: '4', sort: 3, status: 0, createTime: '2024-01-01 00:00:00' },
+  { id: 12, dictType: 'system_data_scope', label: '自定义部门', value: '5', sort: 4, status: 0, createTime: '2024-01-01 00:00:00' },
+  { id: 13, dictType: 'system_user_sex', label: '男', value: '1', sort: 1, status: 0, createTime: '2024-01-01 00:00:00' },
+  { id: 14, dictType: 'system_user_sex', label: '女', value: '2', sort: 2, status: 0, createTime: '2024-01-01 00:00:00' },
 ];
 
 // 角色 Mock
@@ -145,11 +159,60 @@ export const systemHandlers = [
     list = list.slice(start, start + pageSize);
     return HttpResponse.json({ code: 0, data: { list, total } });
   }),
+  http.get(/\/api\/system\/user\/get\/?/, ({ request }) => {
+    const id = Number(new URL(request.url).searchParams.get('id'));
+    const u = userList.find((x) => x.id === id);
+    if (!u) return HttpResponse.json({ code: 404, message: '用户不存在' }, { status: 404 });
+    const deptName = u.deptId ? deptList.find((d) => d.id === u.deptId)?.name : u.deptName;
+    return HttpResponse.json({
+      code: 0,
+      data: { ...u, deptName, roleIds: userRoleIds[id] ?? [] },
+    });
+  }),
+  http.post(/\/api\/system\/user\/create\/?/, async ({ request }) => {
+    const body = (await request.json()) as { username: string; password?: string; nickname?: string; deptId?: number; mobile?: string; status?: number; roleIds?: number[] };
+    if (userList.some((u) => u.username === body.username)) {
+      return HttpResponse.json({ code: 400, message: '用户名已存在' }, { status: 200 });
+    }
+    const id = Math.max(...userList.map((u) => u.id), 0) + 1;
+    const dept = body.deptId ? deptList.find((d) => d.id === body.deptId) : null;
+    const createTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    userList.push({
+      id,
+      username: body.username,
+      nickname: body.nickname ?? body.username,
+      deptId: body.deptId,
+      deptName: dept?.name,
+      mobile: body.mobile ?? '',
+      status: body.status ?? 0,
+      createTime,
+    });
+    if (body.roleIds?.length) userRoleIds[id] = body.roleIds;
+    return HttpResponse.json({ code: 0, data: id });
+  }),
+  http.put(/\/api\/system\/user\/update\/?/, async ({ request }) => {
+    const body = (await request.json()) as { id: number; nickname?: string; deptId?: number; mobile?: string; status?: number; password?: string; roleIds?: number[] };
+    const idx = userList.findIndex((u) => u.id === body.id);
+    if (idx === -1) return HttpResponse.json({ code: 404, message: '用户不存在' }, { status: 404 });
+    const u = userList[idx];
+    if (body.nickname != null) u.nickname = body.nickname;
+    if (body.deptId != null) {
+      u.deptId = body.deptId;
+      u.deptName = deptList.find((d) => d.id === body.deptId)?.name;
+    }
+    if (body.mobile != null) u.mobile = body.mobile;
+    if (body.status != null) u.status = body.status;
+    if (body.roleIds != null) userRoleIds[u.id] = body.roleIds;
+    return HttpResponse.json({ code: 0, data: undefined });
+  }),
   http.get(/\/api\/system\/user\/simple-list\/?/, () => HttpResponse.json({ code: 0, data: JSON.parse(JSON.stringify(userList)) })),
   http.delete(/\/api\/system\/user\/delete\/?/, ({ request }) => {
     const id = Number(new URL(request.url).searchParams.get('id'));
     const idx = userList.findIndex((u) => u.id === id);
-    if (idx !== -1) userList.splice(idx, 1);
+    if (idx !== -1) {
+      userList.splice(idx, 1);
+      delete userRoleIds[id];
+    }
     return HttpResponse.json({ code: 0, data: undefined });
   }),
 
@@ -210,6 +273,13 @@ export const systemHandlers = [
   }),
 
   // ---------- 字典数据 ----------
+  http.get(/\/api\/system\/dict-data\/list-by-types\/?/, ({ request }) => {
+    const types = (new URL(request.url).searchParams.get('types') || '').split(',').map((s) => s.trim()).filter(Boolean);
+    const list = types.length
+      ? dictDataList.filter((d) => types.includes(d.dictType) && d.status === 0)
+      : dictDataList.filter((d) => d.status === 0);
+    return HttpResponse.json({ code: 0, data: JSON.parse(JSON.stringify(list)) });
+  }),
   http.get(/\/api\/system\/dict-data\/page\/?/, ({ request }) => {
     const url = new URL(request.url);
     const pageNo = Number(url.searchParams.get('pageNo')) || 1;

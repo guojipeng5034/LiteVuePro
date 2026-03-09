@@ -131,7 +131,7 @@
       />
     </div>
 
-    <DictDataForm ref="formRef" @success="getList" />
+    <DictDataForm ref="formRef" @success="onFormSuccess" />
   </div>
 </template>
 
@@ -146,6 +146,7 @@ import DictDataForm from './DictDataForm.vue';
 import DictTag from '@/components/DictTag/index.vue';
 import { useMessage } from '@/hooks/useMessage';
 import { useRoute } from 'vue-router';
+import { useDictStore } from '@/store/modules/dict';
 
 defineOptions({ name: 'SystemDictData' });
 
@@ -192,9 +193,15 @@ const resetQuery = () => {
   handleQuery();
 };
 
+const dictStore = useDictStore();
 const formRef = ref<InstanceType<typeof DictDataForm>>();
 const openForm = (type: string, id?: number) => {
   formRef.value?.open(type, id, queryParams.dictType);
+};
+
+const onFormSuccess = async () => {
+  await getList();
+  await dictStore.initDict();
 };
 
 const handleDelete = async (id: number) => {
@@ -203,6 +210,7 @@ const handleDelete = async (id: number) => {
     await DictDataApi.deleteDictData(id);
     message.success(t('common.delSuccess'));
     await getList();
+    await dictStore.initDict();
   } catch {
     // 用户取消
   }
@@ -220,6 +228,7 @@ const handleDeleteBatch = async () => {
     checkedIds.value = [];
     message.success(t('common.delSuccess'));
     await getList();
+    await dictStore.initDict();
   } catch {
     // 用户取消
   }

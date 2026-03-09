@@ -9,9 +9,22 @@ export interface UserVO {
   nickname: string;
   username?: string;
   deptName?: string;
+  deptId?: number;
   mobile?: string;
   status?: number;
   createTime?: string;
+  roleIds?: number[];
+}
+
+export interface UserSaveDTO {
+  id?: number;
+  username?: string;
+  password?: string;
+  nickname?: string;
+  deptId?: number;
+  mobile?: string;
+  status?: number;
+  roleIds?: number[];
 }
 
 export interface UserPageParams {
@@ -35,6 +48,23 @@ export function getUserPage(params: UserPageParams) {
 /** 简单用户列表（用于负责人等下拉） */
 export function getSimpleUserList() {
   return alovaInstance.Get<UserVO[]>('/api/system/user/simple-list').send();
+}
+
+/** 详情 */
+export function getUser(id: number) {
+  return alovaInstance.Get<UserVO>(`/api/system/user/get?id=${id}`).send();
+}
+
+/** 新增 */
+export function createUser(data: UserSaveDTO) {
+  return alovaInstance
+    .Post<number>('/api/system/user/create', data, { config: { dedupKey: 'user-create' } })
+    .send();
+}
+
+/** 修改 */
+export function updateUser(data: UserSaveDTO) {
+  return alovaInstance.Put<void>('/api/system/user/update', data).send();
 }
 
 /** 删除用户 */

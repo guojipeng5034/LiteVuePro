@@ -42,9 +42,11 @@ export function getSimpleDictTypeList() {
   return alovaInstance.Get<DictTypeVO[]>('/api/system/dict-type/simple-list').send();
 }
 
-/** 新增 */
+/** 新增（dedupKey 500ms 内防重复提交） */
 export function createDictType(data: DictTypeVO) {
-  return alovaInstance.Post<number>('/api/system/dict-type/create', data).send();
+  return alovaInstance
+    .Post<number>('/api/system/dict-type/create', data, { config: { dedupKey: 'dict-type-create' } })
+    .send();
 }
 
 /** 修改 */

@@ -30,6 +30,14 @@ export interface PageResult<T> {
   total: number;
 }
 
+/** 按类型批量查询（登录后初始化用） */
+export function getDictDataByTypes(types: string[]) {
+  const typesStr = types?.length ? types.join(',') : '';
+  return alovaInstance.Get<DictDataVO[]>('/api/system/dict-data/list-by-types', {
+    params: { types: typesStr },
+  }).send();
+}
+
 /** 分页查询 */
 export function getDictDataPage(params: DictDataPageParams) {
   return alovaInstance.Get<PageResult<DictDataVO>>('/api/system/dict-data/page', { params }).send();
@@ -42,7 +50,9 @@ export function getDictData(id: number) {
 
 /** 新增 */
 export function createDictData(data: DictDataVO) {
-  return alovaInstance.Post<number>('/api/system/dict-data/create', data).send();
+  return alovaInstance
+    .Post<number>('/api/system/dict-data/create', data, { config: { dedupKey: 'dict-data-create' } })
+    .send();
 }
 
 /** 修改 */
